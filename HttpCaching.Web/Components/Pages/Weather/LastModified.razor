@@ -1,0 +1,37 @@
+﻿@page "/weather-last-modified"
+@using System.Text.Json
+@rendermode InteractiveServer
+@inject IJSRuntime Js
+
+<PageTitle>Last-Modified Demo</PageTitle>    
+
+<h1>Last-Modified Demo</h1>
+
+<p>
+    <input class="last-modified-val" type="text" @bind="_lastModified" />
+    <button @onclick="CallWeather">Call Weather</button>
+</p>
+
+<p>
+        <pre>@_text</pre>
+</p>
+
+@code {
+    private string _lastModified = "Tue, 01 Jan 2024 00:00:00 GMT";
+    private string _text = "";
+
+    private async Task CallWeather()
+    {
+        _text = "Loading...";
+        var wrs = await Js.InvokeAsync<JsonElement>("fetchWeatherLastModified", new {lastModified = _lastModified});
+        _text = JsonSerializer
+            .Serialize(
+                wrs,
+                new JsonSerializerOptions
+                {
+                    WriteIndented = true,
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                }
+            );
+    }
+}

@@ -1,0 +1,12 @@
+﻿@page "/weather-output-cache"
+@attribute [StreamRendering(true)]
+@attribute [OutputCache(Duration = 5)]
+
+
+<PageTitle>OutputCache</PageTitle>
+
+<h1>OutputCache</h1>
+
+<p>This component demonstrates showing data loaded from a backend API service.</p>
+
+<Weather />

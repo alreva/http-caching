@@ -15,6 +15,29 @@
 <body>
     <Routes />
     <script src="_framework/blazor.web.js"></script>
+    <script>
+        window.fetchWeather = async ({endpoint, config}) => {
+            const requestTemplate = {
+                method: 'GET',
+                // headers: lastModified ? { 'If-Modified-Since': lastModified } : {}
+                headers: {}
+            };
+            const request = config
+                ? config({requestTemplate})
+                : requestTemplate;
+            const response = await fetch(`http://localhost:5531/weatherforecast-${endpoint}`, request);
+            const content = response.status === 200 ? (await response.json()) : (await response.text());
+            const res = { status: response.status, headers: Array.from(response.headers.entries()), content: content };
+            console.log(res);
+            return res;
+        };
+        
+        window.fetchWeatherLastModified = async ({lastModified}) => {
+            return await window.fetchWeather({endpoint: "lastmodified", config: ({requestTemplate}) => {
+              return {...requestTemplate, ...{headers:{...requestTemplate.headers, ...{ 'If-Modified-Since': lastModified }}} }
+            }});
+        };
+    </script>
 </body>
 
 </html>
