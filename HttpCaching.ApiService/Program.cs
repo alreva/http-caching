@@ -1,4 +1,5 @@
 using System.Globalization;
+using HttpCaching.ApiService;
 using HttpCaching.ApiService.WeatherForecastService;
 using Microsoft.AspNetCore.Http.HttpResults;
 
@@ -70,16 +71,3 @@ app.MapGet(
 app.MapDefaultEndpoints();
 
 app.Run();
-
-public record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
-
-public class WeatherOptions
-{
-    public TimeSpan Wait { get; set; } = default;
-    public DateTimeOffset LastModified { get; set; } = default;
-    public int MaxAge { get; set; } = default;
-    public string ETag { get; set; }
-}
