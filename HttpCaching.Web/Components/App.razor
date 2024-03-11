@@ -19,7 +19,6 @@
         window.fetchWeather = async ({endpoint, config}) => {
             const requestTemplate = {
                 method: 'GET',
-                // headers: lastModified ? { 'If-Modified-Since': lastModified } : {}
                 headers: {}
             };
             const request = config
@@ -32,9 +31,31 @@
             return res;
         };
         
+        window.fetchWeatherNoCache = async () => {
+            return await window.fetchWeather({endpoint: "nocache"});
+        };
+
+        window.fetchWeatherCacheControl = async ({cache}) => {
+            return await window.fetchWeather({endpoint: "cachecontrol", config: ({requestTemplate}) => {
+              return {...requestTemplate, ...{headers:{...requestTemplate.headers, ...{ 'Cache-Control': cache || "default" }}} }
+            }});
+        };
+
         window.fetchWeatherLastModified = async ({lastModified}) => {
             return await window.fetchWeather({endpoint: "lastmodified", config: ({requestTemplate}) => {
               return {...requestTemplate, ...{headers:{...requestTemplate.headers, ...{ 'If-Modified-Since': lastModified }}} }
+            }});
+        };
+
+        window.fetchWeatherEtag = async ({eTag}) => {
+            return await window.fetchWeather({endpoint: "etag", config: ({requestTemplate}) => {
+              return {...requestTemplate, ...{headers:{...requestTemplate.headers, ...{ 'If-None-Match': eTag }}} }
+            }});
+        };
+
+        window.fetchWeatherCacheControlPlusEtag = async ({cache}) => {
+            return await window.fetchWeather({endpoint: "ccplusetag", config: ({requestTemplate}) => {
+              return {...requestTemplate, ...{headers:{...requestTemplate.headers, ...{ 'Cache-Control': cache || "default" }}} }
             }});
         };
     </script>

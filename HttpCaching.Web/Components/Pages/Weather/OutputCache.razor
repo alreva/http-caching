@@ -1,12 +1,30 @@
 ﻿@page "/weather-output-cache"
-@attribute [StreamRendering(true)]
+@using System.Text.Json
 @attribute [OutputCache(Duration = 5)]
+@inject WeatherApiClient Api
 
+<PageTitle>Output Cache Demo</PageTitle>
 
-<PageTitle>OutputCache</PageTitle>
+<h1>Output Cache Demo</h1>
 
-<h1>OutputCache</h1>
+<p>
+    <pre>@_text</pre>
+</p>
 
-<p>This component demonstrates showing data loaded from a backend API service.</p>
+@code {
+    private string? _text;
 
-<Weather />
+    protected override async Task OnInitializedAsync()
+    {
+        var weather = await Api.GetWeatherAsync();
+        _text = JsonSerializer
+            .Serialize(
+                weather,
+                new JsonSerializerOptions
+                {
+                    WriteIndented = true,
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                }
+            );
+    }
+}

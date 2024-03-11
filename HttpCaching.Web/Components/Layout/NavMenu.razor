@@ -14,30 +14,26 @@
             </NavLink>
         </div>
 
-        @*
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
-        *@
+        @{
+            (string, string)[] routes =
+            {
+                ("weather-no-cache", "No Cache"),
+                ("weather-output-cache", "Output Cache"),
+                ("weather-last-modified", "Last Modified"),
+                ("weather-cache-control", "Cache Control"),
+                ("weather-etag", "ETag"),
+                ("weather-cache-control-plus-etag", "Cache Control + Etag"),
+            };
+            
+            foreach (var (route, label) in routes)
+            {
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="@route">
+                        <span class="bi bi-list-nested" aria-hidden="true"></span> @label
+                    </NavLink>
+                </div>
+            }
+        }
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather-no-cache">
-                <span class="bi bi-list-nested" aria-hidden="true"></span> Weather - No Cache
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather-output-cache">
-                <span class="bi bi-list-nested" aria-hidden="true"></span> Weather - Output Cache
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather-last-modified">
-                <span class="bi bi-list-nested" aria-hidden="true"></span> Weather - Last Modified
-            </NavLink>
-        </div>
     </nav>
 </div>

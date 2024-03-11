@@ -1,14 +1,18 @@
-﻿@page "/weather-last-modified"
+﻿@page "/weather-cache-control"
 @using System.Text.Json
 @rendermode InteractiveServer
 @inject IJSRuntime Js
 
-<PageTitle>Last-Modified Demo</PageTitle>    
+<PageTitle>Cache-Control Demo</PageTitle>    
 
-<h1>Last-Modified Demo</h1>
+<h1>Cache-Control Demo</h1>
 
 <p>
-    <input class="last-modified-val" type="text" @bind="_lastModified" />
+    <input id="cache-option" type="checkbox" @bind="_useCache" />
+    <label for="cache-option">use cache</label>
+</p>
+
+<p>
     <button @onclick="CallWeather">Call Weather</button>
 </p>
 
@@ -17,13 +21,15 @@
 </p>
 
 @code {
-    private string _lastModified = "Mon, 01 Jan 2024 00:00:00 GMT";
     private string _text = "";
+    private bool _useCache = true;
 
     private async Task CallWeather()
     {
         _text = "Loading...";
-        var wrs = await Js.InvokeAsync<JsonElement>("fetchWeatherLastModified", new {lastModified = _lastModified});
+        var wrs = await Js.InvokeAsync<JsonElement>(
+            "fetchWeatherCacheControl",
+            new {cache = _useCache ? null : "no-cache" });
         _text = JsonSerializer
             .Serialize(
                 wrs,

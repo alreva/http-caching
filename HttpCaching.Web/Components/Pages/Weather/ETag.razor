@@ -1,32 +1,30 @@
-﻿@page "/weather-no-cache"
+﻿@page "/weather-etag"
 @using System.Text.Json
 @rendermode InteractiveServer
 @inject IJSRuntime Js
 
-<PageTitle>No Cache Demo</PageTitle>    
+<PageTitle>ETag Demo</PageTitle>    
 
-<h1>No Cache Demo</h1>
+<h1>ETag Demo</h1>
 
 <p>
-    <pre>@_text</pre>
+    <label for="etag">ETag:</label>
+    <input id="etag" class="etag" type="text" @bind="_eTag"/>
+    <button @onclick="CallWeather">Call Weather</button>
+</p>
+
+<p>
+        <pre>@_text</pre>
 </p>
 
 @code {
+    private string _eTag = "";
     private string _text = "";
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            await CallWeather();
-        }
-    }
 
     private async Task CallWeather()
     {
         _text = "Loading...";
-        StateHasChanged();
-        var wrs = await Js.InvokeAsync<JsonElement>("fetchWeatherNoCache");
+        var wrs = await Js.InvokeAsync<JsonElement>("fetchWeatherEtag", new {eTag = _eTag});
         _text = JsonSerializer
             .Serialize(
                 wrs,
@@ -36,6 +34,5 @@
                     PropertyNamingPolicy = JsonNamingPolicy.CamelCase
                 }
             );
-        StateHasChanged();
     }
 }

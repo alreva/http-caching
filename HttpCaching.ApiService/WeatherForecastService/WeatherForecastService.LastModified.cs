@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using System.Globalization;
 using Microsoft.AspNetCore.Http.HttpResults;
 
@@ -6,19 +5,17 @@ namespace HttpCaching.ApiService.WeatherForecastService;
 
 partial class WeatherForecastService
 {
-    private static readonly ConcurrentDictionary<string, DateTimeOffset> LastModifiedRepo = new();
-    
     public async Task<Results<
             Ok<WeatherForecast[]>,
             StatusCodeHttpResult>
         > LastModified(HttpContext ctx)
     {
-        if (!TryGetModifiedSinceFromHeaders(ctx.Request.Headers, out var lastModified))
+        if (!TryGetModifiedSinceFromHeaders(ctx.Request.Headers, out var ifModifiedSince))
         {
             return await NoCacheWithLastModifiedResponseHeader(ctx);
         }
-
-        if (ModifiedLaterThanRequested(lastModified))
+        
+        if (ModifiedLaterThanRequested(weatherOptions.LastModified, ifModifiedSince))
         {
             return await NoCacheWithLastModifiedResponseHeader(ctx);
         }
@@ -32,40 +29,25 @@ partial class WeatherForecastService
         IHeaderDictionary requestHeaders,
         out DateTimeOffset lastModified)
     {
-        return DateTimeOffset.TryParseExact(
-            requestHeaders.IfModifiedSince,
-            "R", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal,
-            out lastModified);
+        return TryParseDate(requestHeaders.IfModifiedSince, out lastModified);
     }
 
-    private static bool ModifiedLaterThanRequested(DateTimeOffset lastModified)
+    private static bool ModifiedLaterThanRequested(DateTimeOffset lastModified, DateTimeOffset ifModifiedSince)
     {
-        if (!LastModifiedRepo.ContainsKey("weather-forecast"))
-        {
-            return false;
-        }
-
-        return LastModifiedRepo["weather-forecast"] > lastModified;
+        return lastModified > ifModifiedSince;
     }
 
     private Task<Ok<WeatherForecast[]>> NoCacheWithLastModifiedResponseHeader(HttpContext ctx)
     {
-        var now = DateTimeOffset.UtcNow;
-        var newLastModified = new DateTimeOffset(
-            now.Year, now.Month, now.Day,
-            now.Hour, now.Minute, now.Second,
-            now.Offset);
-        ctx.Response.Headers.LastModified = newLastModified.ToString("R");
-        LastModifiedRepo["weather-forecast"] = newLastModified;
+        ctx.Response.Headers.LastModified = weatherOptions.LastModified.ToString("R");
         return NoCache();
     }
 
-    private static StatusCodeHttpResult EmptyResultWith304NotModifiedStatus(HttpContext ctx)
-    {
-        ctx.Response.StatusCode = StatusCodes.Status304NotModified;
-        ctx.Response.Headers.LastModified = LastModifiedRepo["weather-forecast"].ToString("R");
-        return TypedResults.StatusCode(StatusCodes.Status304NotModified);
-    }
+    private static bool TryParseDate(string? val, out DateTimeOffset parsed)
+        => DateTimeOffset.TryParseExact(
+            val,
+            "R", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal,
+            out parsed);
 
     #endregion
 }
